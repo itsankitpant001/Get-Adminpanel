@@ -1,15 +1,17 @@
 // ========================================
 // GetGrip Admin Panel - API Constants
 // ========================================
+const isLive = true;
 
 // --- Server Config ---
-// For local development
-export const IP = "localhost:5001";
-export const PROTOCOL = "http";
+const LOCAL_IP = "localhost:5000";
+const LOCAL_PROTOCOL = "http";
 
-// For live (uncomment when deploying)
-// export const IP = "your-domain.com";
-// export const PROTOCOL = "https";
+const LIVE_IP = "getgrip-backend.onrender.com";
+const LIVE_PROTOCOL = "https";
+
+export const IP = isLive ? LIVE_IP : LOCAL_IP;
+export const PROTOCOL = isLive ? LIVE_PROTOCOL : LOCAL_PROTOCOL;
 
 // --- Base URLs ---
 export const API_BASE_URL = `${PROTOCOL}://${IP}/api`;

@@ -5,13 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { SearchSelect } from "@/components/ui/search-select"
 import { FileUpload } from "@/components/FileUpload"
 import { useStore } from "@/store/useStore"
 import { apiGet, apiPost, apiPut } from "@/utils/api"
@@ -29,7 +23,7 @@ interface PhoneModelResponse {
   data: {
     _id: string
     name: string
-    brand: string // Stored as ObjectId in backend, we pass ID
+    brand: string | { _id: string; name: string; logo?: string }
     image: string
     isActive: boolean
   }
@@ -94,9 +88,10 @@ export default function AddPhoneModel() {
       )
       if (response.success) {
         const phoneModel = response.data
+        const brandId = typeof phoneModel.brand === 'object' ? phoneModel.brand._id : phoneModel.brand
         setApiJson({
           name: phoneModel.name,
-          brand: phoneModel.brand, // Pass brand ID
+          brand: brandId,
           image: phoneModel.image ? [phoneModel.image] : [],
           isActive: phoneModel.isActive,
         })
@@ -114,10 +109,6 @@ export default function AddPhoneModel() {
     const newValue =
       type === "checkbox" ? (e.target as HTMLInputElement).checked : value
     updateApiJson(name, newValue)
-  }
-
-  const handleSelectChange = (value: string, name: string) => {
-    updateApiJson(name, value)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -207,28 +198,19 @@ export default function AddPhoneModel() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="brand">Brand *</Label>
-                <Select
-                  name="brand"
+                <Label>Brand *</Label>
+                <SearchSelect
+                  options={brands.map((brand) => ({
+                    value: brand._id,
+                    label: brand.name,
+                    icon: brand.logo || undefined,
+                  }))}
                   value={apiJson.brand || ""}
-                  onValueChange={(value) => handleSelectChange(value, "brand")}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a brand" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {brands.map((brand) => (
-                      <SelectItem key={brand._id} value={brand._id}>
-                        <div className="flex items-center gap-2">
-                          {brand.logo && (
-                            <img src={brand.logo} alt={brand.name} className="h-4 w-4 object-contain" />
-                          )}
-                          {brand.name}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onValueChange={(value) => updateApiJson("brand", value)}
+                  placeholder="Select a brand"
+                  searchPlaceholder="Search brands..."
+                  emptyText="No brands found."
+                />
               </div>
 
               <div className="space-y-2">
